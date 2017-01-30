@@ -19,6 +19,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import edu.unomaha.nhippen.paint.shapes.Line;
+import edu.unomaha.nhippen.paint.shapes.Rectangle;
 import edu.unomaha.nhippen.paint.shapes.Shape;
 
 public class PaintApp extends JFrame implements Runnable {
@@ -36,6 +37,7 @@ public class PaintApp extends JFrame implements Runnable {
 	private boolean disableCursor = false;
 	private List<CustomButton> buttons = new ArrayList<>();
 	private Tool selectedTool = Tool.NONE;
+	private Color selectedColor = Color.BLACK;
 	private List<Shape> shapes = new ArrayList<>();
 
 	private final Map<Tool, ClickAction> toolActions = new HashMap<>();
@@ -55,10 +57,28 @@ public class PaintApp extends JFrame implements Runnable {
 				}
 				if (this.line == null) {
 					this.line = new Line(new Point(point), point);
+					this.line.setColor(selectedColor);
 					shapes.add(this.line);
 				} else {
-					shapes.get(shapes.size() - 1).setPreviewing(false);
+					this.line.setPreviewing(false);
 					this.line = null;
+				}
+			}
+		});
+		toolActions.put(Tool.RECTANGLE, new ClickAction() {
+			private Rectangle rectangle;
+			@Override
+			public void performAction(boolean initialClick) {
+				if (!initialClick) {
+					return;
+				}
+				if (this.rectangle == null) {
+					this.rectangle = new Rectangle(new Point(point), point);
+					this.rectangle.setColor(selectedColor);
+					shapes.add(this.rectangle);
+				} else {
+					this.rectangle.setPreviewing(false);
+					this.rectangle = null;
 				}
 			}
 		});
@@ -89,11 +109,52 @@ public class PaintApp extends JFrame implements Runnable {
 		canvas.addMouseMotionListener(mouse);
 		canvas.addMouseWheelListener(mouse);
 
-		buttons.add(new CustomButton(5, 5, 30, 30) {
+		buttons.add(new CustomButton(5, 5, 30, 30, new Line(new Point(5, 35), new Point(35, 5))) {
 			@Override
 			public void performAction() {
 				selectedTool = Tool.LINE;
-				System.out.println("Selected tool: " + Tool.LINE);
+			}
+		});
+		buttons.add(new CustomButton(5, 40, 30, 30, new Rectangle(new Point(10, 45), new Point(30, 65))) {
+			@Override
+			public void performAction() {
+				selectedTool = Tool.RECTANGLE;
+			}
+		});
+		buttons.add(new CustomButton(5, 75, 30, 30) {
+			@Override
+			public void performAction() {
+				selectedTool = Tool.POLY_LINE;
+			}
+		});
+		buttons.add(new CustomButton(5, 110, 30, 30) {
+			@Override
+			public void performAction() {
+				selectedTool = Tool.FREE_DRAW;
+			}
+		});
+		buttons.add(new CustomButton(5, 145, 30, 30, Color.BLUE, true) {
+			@Override
+			public void performAction() {
+				selectedColor = Color.BLUE;
+			}
+		});
+		buttons.add(new CustomButton(5, 180, 30, 30, Color.RED, true) {
+			@Override
+			public void performAction() {
+				selectedColor = Color.RED;
+			}
+		});
+		buttons.add(new CustomButton(5, 215, 30, 30, Color.GREEN, true) {
+			@Override
+			public void performAction() {
+				selectedColor = Color.GREEN;
+			}
+		});
+		buttons.add(new CustomButton(5, 250, 30, 30, Color.BLACK, true) {
+			@Override
+			public void performAction() {
+				selectedColor = Color.BLACK;
 			}
 		});
 
@@ -197,9 +258,6 @@ public class PaintApp extends JFrame implements Runnable {
 		if (selectedTool == null || selectedTool == Tool.NONE) {
 			return;
 		}
-		if (initialClick) {
-			System.out.println("Clicked at " + point);
-		}
 		ClickAction clickAction = toolActions.get(selectedTool);
 		if (clickAction == null) {
 			throw new Tool.ToolException("No action defined for tool: " + selectedTool);
@@ -217,12 +275,13 @@ public class PaintApp extends JFrame implements Runnable {
 	}
 
 	private void render(Graphics g) { //Mostly the same
-		g.drawRect(0, 0, 40, 300); // Toolbar
-		for (CustomButton button : buttons) {
-			button.draw(g);
-		}
 		for (Shape shape : shapes) {
 			shape.draw(g);
+		}
+		g.setColor(Color.BLACK);
+		g.drawRect(0, 0, 40, 285); // Toolbar
+		for (CustomButton button : buttons) {
+			button.draw(g);
 		}
 	}
 
