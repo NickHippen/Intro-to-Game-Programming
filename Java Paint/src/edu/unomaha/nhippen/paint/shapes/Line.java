@@ -1,4 +1,4 @@
-package edu.unomaha.nhippen.paint;
+package edu.unomaha.nhippen.paint.shapes;
 
 import java.awt.Graphics;
 import java.awt.Point;

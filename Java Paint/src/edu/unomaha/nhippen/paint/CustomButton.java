@@ -4,6 +4,8 @@ import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
 
+import edu.unomaha.nhippen.paint.shapes.Drawable;
+
 public abstract class CustomButton implements Drawable {
 
 	private Rectangle rectangle;
@@ -20,7 +22,7 @@ public abstract class CustomButton implements Drawable {
 	public boolean contains(Point point) {
 		return rectangle.contains(point);
 	}
-
+	
 	public abstract void performAction();
 
 }

@@ -1,4 +1,4 @@
-package edu.unomaha.nhippen.paint;
+package edu.unomaha.nhippen.paint.shapes;
 
 public abstract class Shape implements Drawable {
 

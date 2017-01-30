@@ -18,12 +18,14 @@ import java.util.Map;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import edu.unomaha.nhippen.paint.shapes.Line;
+import edu.unomaha.nhippen.paint.shapes.Shape;
+
 public class PaintApp extends JFrame implements Runnable {
 
 	private static final int WIDTH_X = 1280;
 	private static final int WIDTH_Y = 720;
 
-	private FrameRate frameRate;
 	private BufferStrategy bs;
 	private volatile boolean running;
 	private Thread gameThread;
@@ -32,15 +34,13 @@ public class PaintApp extends JFrame implements Runnable {
 	private KeyboardInput keys;
 	private Point point = new Point(0, 0);
 	private boolean disableCursor = false;
-	private List<CustomButton> buttons;
+	private List<CustomButton> buttons = new ArrayList<>();
 	private Tool selectedTool = Tool.NONE;
 	private List<Shape> shapes = new ArrayList<>();
 
 	private final Map<Tool, ClickAction> toolActions = new HashMap<>();
 
 	public PaintApp() {
-		frameRate = new FrameRate();
-		buttons = new ArrayList<>();
 		applyToolActions();
 	}
 	
@@ -65,9 +65,7 @@ public class PaintApp extends JFrame implements Runnable {
 	}
 
 	protected void onPaint(Graphics g) {
-		frameRate.calculate(); // Run FrameRate calculate
 		g.setColor(Color.BLACK); // Set the color to be drawn black
-		g.drawString(frameRate.getFrameRate(), 30, 30); // Draw String to given coordinates
 		repaint(); // Request another paint call
 	}
 
@@ -231,7 +229,6 @@ public class PaintApp extends JFrame implements Runnable {
 	@Override
 	public void run() {
 		running = true;
-		frameRate.initialize();
 		while (running) {
 			gameLoop();
 		}
