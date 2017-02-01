@@ -14,6 +14,12 @@ public class FreeLine extends Shape {
 		points.add(p2);
 	}
 	
+	public FreeLine(Point... ps) {
+		for (Point p : ps) {
+			points.add(p);
+		}
+	}
+	
 	public void addPoint(Point point) {
 		// Prevent duplicate points if held down in one spot
 		if (!equalsLastPoint(point)) {

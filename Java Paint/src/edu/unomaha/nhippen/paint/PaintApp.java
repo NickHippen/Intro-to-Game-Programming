@@ -147,25 +147,39 @@ public class PaintApp extends JFrame implements Runnable {
 		canvas.addMouseMotionListener(mouse);
 		canvas.addMouseWheelListener(mouse);
 
-		buttons.add(new CustomButton(5, 5, 30, 30, new Line(new Point(5, 35), new Point(35, 5))) {
+		buttons.add(new CustomButton(5, 5, 30, 30,
+				new Line(new Point(5, 35),
+						new Point(35, 5))) {
 			@Override
 			public void performAction() {
 				selectedTool = Tool.LINE;
 			}
 		});
-		buttons.add(new CustomButton(5, 40, 30, 30, new Rectangle(new Point(10, 45), new Point(30, 65))) {
+		buttons.add(new CustomButton(5, 40, 30, 30,
+				new Rectangle(new Point(10, 45),
+						new Point(30, 65))) {
 			@Override
 			public void performAction() {
 				selectedTool = Tool.RECTANGLE;
 			}
 		});
-		buttons.add(new CustomButton(5, 75, 30, 30) {
+		buttons.add(new CustomButton(5, 75, 30, 30,
+				new FreeLine(new Point(10, 100),
+						new Point(16, 90),
+						new Point(22, 100),
+						new Point(28, 80))) {
 			@Override
 			public void performAction() {
 				selectedTool = Tool.POLY_LINE;
 			}
 		});
-		buttons.add(new CustomButton(5, 110, 30, 30) {
+		buttons.add(new CustomButton(5, 110, 30, 30,
+				new FreeLine(new Point(10, 135),
+						new Point(10, 115),
+						new Point(25, 115),
+						new Point(10, 115),
+						new Point(10, 123),
+						new Point(20, 123))) {
 			@Override
 			public void performAction() {
 				selectedTool = Tool.FREE_DRAW;
