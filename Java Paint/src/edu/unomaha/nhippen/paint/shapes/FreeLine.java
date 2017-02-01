@@ -10,14 +10,20 @@ public class FreeLine extends Shape {
 	private List<Point> points = new ArrayList<>();
 	
 	public FreeLine(Point p1, Point p2) {
+		this();
 		points.add(p1);
 		points.add(p2);
 	}
 	
 	public FreeLine(Point... ps) {
+		this();
 		for (Point p : ps) {
 			points.add(p);
 		}
+	}
+	
+	public FreeLine() {
+		setPreviewing(false);
 	}
 	
 	public void addPoint(Point point) {

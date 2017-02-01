@@ -7,20 +7,16 @@ import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Toolkit;
-import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferStrategy;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import edu.unomaha.nhippen.paint.shapes.FreeLine;
 import edu.unomaha.nhippen.paint.shapes.Line;
-import edu.unomaha.nhippen.paint.shapes.PolyLine;
 import edu.unomaha.nhippen.paint.shapes.Rectangle;
 import edu.unomaha.nhippen.paint.shapes.Shape;
 import edu.unomaha.nhippen.paint.tools.Tool;
@@ -30,6 +26,8 @@ public class PaintApp extends JFrame implements Runnable {
 
 	private static final int WIDTH_X = 1280;
 	private static final int WIDTH_Y = 720;
+	
+	private static final int CURSOR_RADIUS = 10;
 
 	private BufferStrategy bs;
 	private volatile boolean running;
@@ -38,12 +36,15 @@ public class PaintApp extends JFrame implements Runnable {
 	private RelativeMouseInput mouse;
 	private KeyboardInput keys;
 	private Point point = new Point(0, 0);
-	private boolean disableCursor = false;
 	private List<CustomButton> buttons = new ArrayList<>();
 	private Tool selectedTool = null;
 	private Color selectedColor = Color.BLACK;
 	private List<Shape> shapes = new ArrayList<>();
 
+	public PaintApp() {
+		disableCursor();
+	}
+	
 	protected void onPaint(Graphics g) {
 		g.setColor(Color.BLACK); // Set the color to be drawn black
 		repaint(); // Request another paint call
@@ -69,6 +70,7 @@ public class PaintApp extends JFrame implements Runnable {
 		canvas.addMouseMotionListener(mouse);
 		canvas.addMouseWheelListener(mouse);
 
+		// Add buttons to toggle tools/colors
 		buttons.add(new CustomButton(5, 5, 30, 30,
 				new Line(new Point(5, 35),
 						new Point(35, 5))) {
@@ -104,7 +106,7 @@ public class PaintApp extends JFrame implements Runnable {
 						new Point(20, 123))) {
 			@Override
 			public void performAction() {
-				selectedTool = Tool.FREE_DRAW;
+				selectedTool = Tool.FREE_LINE;
 			}
 		});
 		buttons.add(new CustomButton(5, 145, 30, 30, Color.BLUE, true) {
@@ -198,21 +200,6 @@ public class PaintApp extends JFrame implements Runnable {
 		else if (point.y > canvas.getHeight() - 1)
 			point.y = -25;
 
-		// Toggle relative
-		if (keys.keyDownOnce(KeyEvent.VK_SPACE)) {
-			mouse.setRelative(!mouse.isRelative());
-		}
-		// Toggle cursor
-		if (keys.keyDownOnce(KeyEvent.VK_C)) {
-			disableCursor = !disableCursor;
-			if (disableCursor) {
-				disableCursor();
-			} else {
-				// setCoursor( Cursor.DEFAULT_CURSOR ) is deprecated
-				setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-			}
-		}
-
 		if (mouse.buttonDownOnce(MouseEvent.BUTTON1)) {
 			processMouseLeftClick(true);
 		} else if (mouse.buttonDown(MouseEvent.BUTTON1)) {
@@ -232,12 +219,12 @@ public class PaintApp extends JFrame implements Runnable {
 					button.performAction();
 					if (!shapes.isEmpty()) {
 						Shape lastShape = shapes.get(shapes.size() - 1);
-						System.out.println(shapes.size() + ", " + lastShape.isPreviewing());
 						if (lastShape.isPreviewing()) {
-							shapes.remove(shapes.size() - 1);
-							System.out.println("Remove shape");
+							Shape removed = shapes.remove(shapes.size() - 1);
+							removed.setPreviewing(false);
 						}
 					}
+					Tool.resetAll();
 					return;
 				}
 			}
@@ -257,7 +244,7 @@ public class PaintApp extends JFrame implements Runnable {
 
 	private void disableCursor() {
 		Toolkit tk = Toolkit.getDefaultToolkit();
-		Image image = tk.createImage("test.png");
+		Image image = tk.createImage("");
 		Point point = new Point(0, 0);
 		String name = "CanBeAnything";
 		Cursor cursor = tk.createCustomCursor(image, point, name);
@@ -273,6 +260,12 @@ public class PaintApp extends JFrame implements Runnable {
 		for (CustomButton button : buttons) {
 			button.draw(g);
 		}
+		drawCursor(g);
+	}
+	
+	private void drawCursor(Graphics g) {
+		g.drawLine(point.x, point.y + CURSOR_RADIUS, point.x, point.y - CURSOR_RADIUS);
+		g.drawLine(point.x + CURSOR_RADIUS, point.y, point.x - CURSOR_RADIUS, point.y);
 	}
 
 	@Override

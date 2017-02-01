@@ -22,5 +22,10 @@ public class RectangleTool extends Tool {
 			this.rectangle = null;
 		}
 	}
+
+	@Override
+	void reset() {
+		this.rectangle = null;
+	}
 	
 }

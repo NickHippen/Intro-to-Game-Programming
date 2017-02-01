@@ -15,7 +15,8 @@ public class PolyLineTool extends Tool {
 		}
 		if (toolClick.rightClick) {
 			this.polyLine.removeLastPoint();
-			this.polyLine = null;
+			this.polyLine.setPreviewing(false);
+			reset();
 			return;
 		}
 		if (this.polyLine == null) {
@@ -25,6 +26,11 @@ public class PolyLineTool extends Tool {
 		} else {
 			this.polyLine.addPoint(toolClick.point);
 		}
+	}
+	
+	@Override
+	void reset() {
+		this.polyLine = null;
 	}
 	
 }

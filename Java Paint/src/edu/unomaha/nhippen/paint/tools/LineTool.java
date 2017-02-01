@@ -19,8 +19,13 @@ public class LineTool extends Tool {
 			toolClick.shapes.add(this.line);
 		} else {
 			this.line.setPreviewing(false);
-			this.line = null;
+			reset();
 		}
 	}
 
+	@Override
+	void reset() {
+		this.line = null;
+	}
+	
 }

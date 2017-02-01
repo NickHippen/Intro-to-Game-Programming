@@ -4,7 +4,7 @@ import java.awt.Point;
 
 import edu.unomaha.nhippen.paint.shapes.FreeLine;
 
-public class FreeDrawTool extends Tool {
+public class FreeLineTool extends Tool {
 
 	private FreeLine freeLine;
 	
@@ -23,6 +23,11 @@ public class FreeDrawTool extends Tool {
 			return;
 		}
 		this.freeLine.addPoint(toolClick.point);
+	}
+
+	@Override
+	void reset() {
+		this.freeLine = null;
 	}
 	
 }
