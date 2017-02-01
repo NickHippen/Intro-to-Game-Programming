@@ -23,6 +23,7 @@ import edu.unomaha.nhippen.paint.shapes.Line;
 import edu.unomaha.nhippen.paint.shapes.PolyLine;
 import edu.unomaha.nhippen.paint.shapes.Rectangle;
 import edu.unomaha.nhippen.paint.shapes.Shape;
+import edu.unomaha.nhippen.paint.tools.Tool;
 
 public class PaintApp extends JFrame implements Runnable {
 
@@ -38,7 +39,7 @@ public class PaintApp extends JFrame implements Runnable {
 	private Point point = new Point(0, 0);
 	private boolean disableCursor = false;
 	private List<CustomButton> buttons = new ArrayList<>();
-	private Tool selectedTool = Tool.NONE;
+	private Tool selectedTool = null;
 	private Color selectedColor = Color.BLACK;
 	private List<Shape> shapes = new ArrayList<>();
 
@@ -93,6 +94,7 @@ public class PaintApp extends JFrame implements Runnable {
 				}
 				if (rightClick) {
 					this.polyLine.removeLastPoint();
+					this.polyLine = null;
 					return;
 				}
 				if (this.polyLine == null) {
@@ -312,7 +314,7 @@ public class PaintApp extends JFrame implements Runnable {
 				}
 			}
 		}
-		if (selectedTool == null || selectedTool == Tool.NONE) {
+		if (selectedTool == null) {
 			return;
 		}
 		ClickAction clickAction = toolActions.get(selectedTool);
@@ -323,7 +325,7 @@ public class PaintApp extends JFrame implements Runnable {
 	}
 	
 	private void processMouseRightClick(boolean initialClick) {
-		if (selectedTool == null || selectedTool == Tool.NONE) {
+		if (selectedTool == null) {
 			return;
 		}
 		ClickAction clickAction = toolActions.get(selectedTool);
