@@ -18,6 +18,7 @@ import java.util.Map;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import edu.unomaha.nhippen.paint.shapes.FreeLine;
 import edu.unomaha.nhippen.paint.shapes.Line;
 import edu.unomaha.nhippen.paint.shapes.PolyLine;
 import edu.unomaha.nhippen.paint.shapes.Rectangle;
@@ -52,8 +53,8 @@ public class PaintApp extends JFrame implements Runnable {
 		toolActions.put(Tool.LINE, new ClickAction() {
 			private Line line;
 			@Override
-			public void performAction(boolean initialClick) {
-				if (!initialClick) {
+			public void performAction(boolean initialClick, boolean rightClick) {
+				if (!initialClick || rightClick) {
 					return;
 				}
 				if (this.line == null) {
@@ -69,8 +70,8 @@ public class PaintApp extends JFrame implements Runnable {
 		toolActions.put(Tool.RECTANGLE, new ClickAction() {
 			private Rectangle rectangle;
 			@Override
-			public void performAction(boolean initialClick) {
-				if (!initialClick) {
+			public void performAction(boolean initialClick, boolean rightClick) {
+				if (!initialClick || rightClick) {
 					return;
 				}
 				if (this.rectangle == null) {
@@ -86,8 +87,12 @@ public class PaintApp extends JFrame implements Runnable {
 		toolActions.put(Tool.POLY_LINE, new ClickAction() {
 			private PolyLine polyLine;
 			@Override
-			public void performAction(boolean initialClick) {
+			public void performAction(boolean initialClick, boolean rightClick) {
 				if (!initialClick) {
+					return;
+				}
+				if (rightClick) {
+					this.polyLine.removeLastPoint();
 					return;
 				}
 				if (this.polyLine == null) {
@@ -95,10 +100,24 @@ public class PaintApp extends JFrame implements Runnable {
 					this.polyLine.setColor(selectedColor);
 					shapes.add(this.polyLine);
 				} else {
-//					this.polyLine.setPreviewing(false);
-//					this.polyLine = null;
 					this.polyLine.addPoint(point);
 				}
+			}
+		});
+		toolActions.put(Tool.FREE_DRAW, new ClickAction() {
+			private FreeLine freeLine;
+			@Override
+			public void performAction(boolean initialClick, boolean rightClick) {
+				if (initialClick) {
+					this.freeLine = new FreeLine(new Point(point), new Point(point));
+					this.freeLine.setColor(selectedColor);
+					shapes.add(this.freeLine);
+					return;
+				}
+				if (freeLine == null) {
+					return;
+				}
+				this.freeLine.addPoint(point);
 			}
 		});
 	}
@@ -259,13 +278,18 @@ public class PaintApp extends JFrame implements Runnable {
 		}
 
 		if (mouse.buttonDownOnce(MouseEvent.BUTTON1)) {
-			processMouseClick(true);
+			processMouseLeftClick(true);
 		} else if (mouse.buttonDown(MouseEvent.BUTTON1)) {
-			processMouseClick(false);
+			processMouseLeftClick(false);
+		}
+		if (mouse.buttonDownOnce(MouseEvent.BUTTON3)) {
+			processMouseRightClick(true);
+		} else if (mouse.buttonDown(MouseEvent.BUTTON3)) {
+			processMouseRightClick(false);
 		}
 	}
 
-	private void processMouseClick(boolean initialClick) {
+	private void processMouseLeftClick(boolean initialClick) {
 		if (initialClick) {
 			for (CustomButton button : buttons) {
 				if (button.contains(mouse.getPosition())) {
@@ -281,7 +305,18 @@ public class PaintApp extends JFrame implements Runnable {
 		if (clickAction == null) {
 			throw new Tool.ToolException("No action defined for tool: " + selectedTool);
 		}
-		clickAction.performAction(initialClick);
+		clickAction.performAction(initialClick, false);
+	}
+	
+	private void processMouseRightClick(boolean initialClick) {
+		if (selectedTool == null || selectedTool == Tool.NONE) {
+			return;
+		}
+		ClickAction clickAction = toolActions.get(selectedTool);
+		if (clickAction == null) {
+			throw new Tool.ToolException("No action defined for tool: " + selectedTool);
+		}
+		clickAction.performAction(initialClick, true);
 	}
 
 	private void disableCursor() {

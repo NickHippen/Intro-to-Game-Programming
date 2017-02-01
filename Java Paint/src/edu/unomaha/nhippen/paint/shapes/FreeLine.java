@@ -5,23 +5,24 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PolyLine extends Shape {
+public class FreeLine extends Shape {
 
 	private List<Point> points = new ArrayList<>();
 	
-	public PolyLine(Point point1, Point point2) {
-		points.add(point1);
-		points.add(point2);
+	public FreeLine(Point p1, Point p2) {
+		points.add(p1);
+		points.add(p2);
 	}
 	
 	public void addPoint(Point point) {
-		int pointCount = points.size();
-		points.set(pointCount - 1, new Point(points.get(pointCount - 1)));
-		points.add(point);
+		// Prevent duplicate points if held down in one spot
+		if (!equalsLastPoint(point)) {
+			points.add(new Point(point));
+		}
 	}
 	
-	public void removeLastPoint() {
-		points.remove(points.size() - 1);
+	private boolean equalsLastPoint(Point point) {
+		return point.equals(points.get(points.size() - 1));
 	}
 	
 	@Override
