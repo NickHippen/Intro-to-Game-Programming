@@ -7,6 +7,7 @@ import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Toolkit;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferStrategy;
 import java.util.ArrayList;
@@ -210,6 +211,10 @@ public class PaintApp extends JFrame implements Runnable {
 		} else if (mouse.buttonDown(MouseEvent.BUTTON3)) {
 			processMouseRightClick(false);
 		}
+		
+		if (keys.keyDownOnce(KeyEvent.VK_C)) {
+			shapes.clear();
+		}
 	}
 
 	private void processMouseLeftClick(boolean initialClick) {
@@ -257,6 +262,8 @@ public class PaintApp extends JFrame implements Runnable {
 		}
 		g.setColor(Color.BLACK);
 		g.drawRect(0, 0, 40, 285); // Toolbar
+		g.setColor(Color.WHITE);
+		g.fillRect(1, 1, 39, 284);
 		for (CustomButton button : buttons) {
 			button.draw(g);
 		}
@@ -264,6 +271,7 @@ public class PaintApp extends JFrame implements Runnable {
 	}
 	
 	private void drawCursor(Graphics g) {
+		g.setColor(selectedColor);
 		g.drawLine(point.x, point.y + CURSOR_RADIUS, point.x, point.y - CURSOR_RADIUS);
 		g.drawLine(point.x + CURSOR_RADIUS, point.y, point.x - CURSOR_RADIUS, point.y);
 	}
