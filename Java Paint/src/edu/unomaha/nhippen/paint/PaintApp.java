@@ -19,6 +19,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import edu.unomaha.nhippen.paint.shapes.Line;
+import edu.unomaha.nhippen.paint.shapes.PolyLine;
 import edu.unomaha.nhippen.paint.shapes.Rectangle;
 import edu.unomaha.nhippen.paint.shapes.Shape;
 
@@ -79,6 +80,24 @@ public class PaintApp extends JFrame implements Runnable {
 				} else {
 					this.rectangle.setPreviewing(false);
 					this.rectangle = null;
+				}
+			}
+		});
+		toolActions.put(Tool.POLY_LINE, new ClickAction() {
+			private PolyLine polyLine;
+			@Override
+			public void performAction(boolean initialClick) {
+				if (!initialClick) {
+					return;
+				}
+				if (this.polyLine == null) {
+					this.polyLine = new PolyLine(new Point(point), point);
+					this.polyLine.setColor(selectedColor);
+					shapes.add(this.polyLine);
+				} else {
+//					this.polyLine.setPreviewing(false);
+//					this.polyLine = null;
+					this.polyLine.addPoint(point);
 				}
 			}
 		});
