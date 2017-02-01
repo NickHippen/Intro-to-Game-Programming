@@ -4,7 +4,7 @@ import java.awt.Color;
 
 public abstract class Shape implements Drawable {
 
-	private boolean previewing;
+	private boolean previewing = true;
 	private Color color;
 
 	public boolean isPreviewing() {

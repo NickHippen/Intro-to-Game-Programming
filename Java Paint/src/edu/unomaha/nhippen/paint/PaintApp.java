@@ -24,6 +24,7 @@ import edu.unomaha.nhippen.paint.shapes.PolyLine;
 import edu.unomaha.nhippen.paint.shapes.Rectangle;
 import edu.unomaha.nhippen.paint.shapes.Shape;
 import edu.unomaha.nhippen.paint.tools.Tool;
+import edu.unomaha.nhippen.paint.tools.ToolClick;
 
 public class PaintApp extends JFrame implements Runnable {
 
@@ -42,87 +43,6 @@ public class PaintApp extends JFrame implements Runnable {
 	private Tool selectedTool = null;
 	private Color selectedColor = Color.BLACK;
 	private List<Shape> shapes = new ArrayList<>();
-
-	private final Map<Tool, ClickAction> toolActions = new HashMap<>();
-
-	public PaintApp() {
-		applyToolActions();
-	}
-	
-	private void applyToolActions() {
-		// Apply the actions that will be done per tick for each tool on click
-		toolActions.put(Tool.LINE, new ClickAction() {
-			private Line line;
-			@Override
-			public void performAction(boolean initialClick, boolean rightClick) {
-				if (!initialClick || rightClick) {
-					return;
-				}
-				if (this.line == null) {
-					this.line = new Line(new Point(point), point);
-					this.line.setColor(selectedColor);
-					shapes.add(this.line);
-				} else {
-					this.line.setPreviewing(false);
-					this.line = null;
-				}
-			}
-		});
-		toolActions.put(Tool.RECTANGLE, new ClickAction() {
-			private Rectangle rectangle;
-			@Override
-			public void performAction(boolean initialClick, boolean rightClick) {
-				if (!initialClick || rightClick) {
-					return;
-				}
-				if (this.rectangle == null) {
-					this.rectangle = new Rectangle(new Point(point), point);
-					this.rectangle.setColor(selectedColor);
-					shapes.add(this.rectangle);
-				} else {
-					this.rectangle.setPreviewing(false);
-					this.rectangle = null;
-				}
-			}
-		});
-		toolActions.put(Tool.POLY_LINE, new ClickAction() {
-			private PolyLine polyLine;
-			@Override
-			public void performAction(boolean initialClick, boolean rightClick) {
-				if (!initialClick) {
-					return;
-				}
-				if (rightClick) {
-					this.polyLine.removeLastPoint();
-					this.polyLine = null;
-					return;
-				}
-				if (this.polyLine == null) {
-					this.polyLine = new PolyLine(new Point(point), point);
-					this.polyLine.setColor(selectedColor);
-					shapes.add(this.polyLine);
-				} else {
-					this.polyLine.addPoint(point);
-				}
-			}
-		});
-		toolActions.put(Tool.FREE_DRAW, new ClickAction() {
-			private FreeLine freeLine;
-			@Override
-			public void performAction(boolean initialClick, boolean rightClick) {
-				if (initialClick) {
-					this.freeLine = new FreeLine(new Point(point), new Point(point));
-					this.freeLine.setColor(selectedColor);
-					shapes.add(this.freeLine);
-					return;
-				}
-				if (freeLine == null) {
-					return;
-				}
-				this.freeLine.addPoint(point);
-			}
-		});
-	}
 
 	protected void onPaint(Graphics g) {
 		g.setColor(Color.BLACK); // Set the color to be drawn black
@@ -310,6 +230,14 @@ public class PaintApp extends JFrame implements Runnable {
 			for (CustomButton button : buttons) {
 				if (button.contains(mouse.getPosition())) {
 					button.performAction();
+					if (!shapes.isEmpty()) {
+						Shape lastShape = shapes.get(shapes.size() - 1);
+						System.out.println(shapes.size() + ", " + lastShape.isPreviewing());
+						if (lastShape.isPreviewing()) {
+							shapes.remove(shapes.size() - 1);
+							System.out.println("Remove shape");
+						}
+					}
 					return;
 				}
 			}
@@ -317,22 +245,14 @@ public class PaintApp extends JFrame implements Runnable {
 		if (selectedTool == null) {
 			return;
 		}
-		ClickAction clickAction = toolActions.get(selectedTool);
-		if (clickAction == null) {
-			throw new Tool.ToolException("No action defined for tool: " + selectedTool);
-		}
-		clickAction.performAction(initialClick, false);
+		selectedTool.processInput(new ToolClick(initialClick, false, selectedColor, point, shapes));
 	}
 	
 	private void processMouseRightClick(boolean initialClick) {
 		if (selectedTool == null) {
 			return;
 		}
-		ClickAction clickAction = toolActions.get(selectedTool);
-		if (clickAction == null) {
-			throw new Tool.ToolException("No action defined for tool: " + selectedTool);
-		}
-		clickAction.performAction(initialClick, true);
+		selectedTool.processInput(new ToolClick(initialClick, true, selectedColor, point, shapes));
 	}
 
 	private void disableCursor() {
