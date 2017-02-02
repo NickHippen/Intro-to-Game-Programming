@@ -3,6 +3,11 @@ package edu.unomaha.nhippen.paint;
 import edu.unomaha.nhippen.paint.shapes.Shape;
 import edu.unomaha.nhippen.paint.tools.Tool;
 
+/**
+ * An extension of CustomButton that allows the additional storage of a tool
+ * @author nhipp
+ *
+ */
 public abstract class ToolButton extends CustomButton {
 
 	private Tool tool;

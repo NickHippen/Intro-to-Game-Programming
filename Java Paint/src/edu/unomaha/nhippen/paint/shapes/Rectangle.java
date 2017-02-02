@@ -24,7 +24,10 @@ public class Rectangle extends Shape {
 	@Override
 	public void setPreviewing(boolean previewing) {
 		super.setPreviewing(previewing);
-		point2 = new Point(point2);
+		// Clone to stop preview
+		if (!previewing) {
+			point2 = new Point(point2);
+		}
 	}
 
 }

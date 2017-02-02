@@ -10,14 +10,14 @@ public class LineTool extends Tool {
 	
 	@Override
 	public void processInput(ToolClick toolClick) {
-		if (!toolClick.initialClick || toolClick.rightClick) {
+		if (!toolClick.initialClick || toolClick.rightClick) { // Do nothing
 			return;
 		}
-		if (this.line == null) {
+		if (this.line == null) { // First point
 			this.line = new Line(new Point(toolClick.point), toolClick.point);
 			this.line.setColor(toolClick.selectedColor);
 			toolClick.shapes.add(this.line);
-		} else {
+		} else { // Second point; disable preview
 			this.line.setPreviewing(false);
 			reset();
 		}

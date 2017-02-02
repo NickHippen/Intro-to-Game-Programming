@@ -1,5 +1,10 @@
 package edu.unomaha.nhippen.paint.tools;
 
+/**
+ * A tool that can be used to draw a shape
+ * @author nhipp
+ *
+ */
 public abstract class Tool {
 
 	public static final LineTool LINE = new LineTool();
@@ -9,10 +14,20 @@ public abstract class Tool {
 	
 	Tool() {}
 	
+	/**
+	 * Determines how the tool should handle input
+	 * @param toolClick the event object hold properties useful for the event
+	 */
 	public abstract void processInput(ToolClick toolClick);
 	
+	/**
+	 * Resets a tool back to its original state
+	 */
 	abstract void reset();
 	
+	/**
+	 * Resets all tools back to their original states
+	 */
 	public static void resetAll() {
 		LINE.reset();
 		RECTANGLE.reset();
@@ -20,6 +35,11 @@ public abstract class Tool {
 		FREE_LINE.reset();
 	}
 
+	/**
+	 * An exception related to a tool
+	 * @author nhipp
+	 *
+	 */
 	public static class ToolException extends RuntimeException {
 		
 		public ToolException() {

@@ -10,14 +10,14 @@ public class RectangleTool extends Tool {
 	
 	@Override
 	public void processInput(ToolClick toolClick) {
-		if (!toolClick.initialClick || toolClick.rightClick) {
+		if (!toolClick.initialClick || toolClick.rightClick) { // Do nothing
 			return;
 		}
-		if (this.rectangle == null) {
+		if (this.rectangle == null) { // New shape; first point
 			this.rectangle = new Rectangle(new Point(toolClick.point), toolClick.point);
 			this.rectangle.setColor(toolClick.selectedColor);
 			toolClick.shapes.add(this.rectangle);
-		} else {
+		} else { // Second point; cancel preview
 			this.rectangle.setPreviewing(false);
 			this.rectangle = null;
 		}

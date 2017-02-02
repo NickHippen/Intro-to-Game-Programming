@@ -11,10 +11,10 @@ public class FreeLineTool extends Tool {
 	@Override
 	public void processInput(ToolClick toolClick) {
 		if (toolClick.rightClick) {
-			return;
+			return; // Do nothing
 		}
 		if (toolClick.initialClick) {
-			this.freeLine = new FreeLine(new Point(toolClick.point), new Point(toolClick.point));
+			this.freeLine = new FreeLine(new Point(toolClick.point), new Point(toolClick.point)); // Begin shape
 			this.freeLine.setColor(toolClick.selectedColor);
 			toolClick.shapes.add(this.freeLine);
 			return;
@@ -22,6 +22,7 @@ public class FreeLineTool extends Tool {
 		if (freeLine == null) {
 			return;
 		}
+		// Being held down; continue adding to shape
 		this.freeLine.addPoint(toolClick.point);
 	}
 

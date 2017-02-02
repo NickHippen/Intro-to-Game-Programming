@@ -6,6 +6,11 @@ import java.util.List;
 
 import edu.unomaha.nhippen.paint.shapes.Shape;
 
+/**
+ * An object that holds various useful properties for a tool click event
+ * @author nhipp
+ *
+ */
 public class ToolClick {
 
 	public boolean initialClick;

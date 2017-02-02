@@ -72,6 +72,7 @@ public class PaintApp extends JFrame implements Runnable {
 		canvas.addMouseWheelListener(mouse);
 
 		// Add buttons to toggle tools/colors
+		// Tool buttons
 		buttons.add(new ToolButton(Tool.LINE, 5, 5, 30, 30,
 				new Line(new Point(5, 35),
 						new Point(35, 5))) {
@@ -110,6 +111,7 @@ public class PaintApp extends JFrame implements Runnable {
 				selectedTool = getTool();
 			}
 		});
+		// Color buttons
 		buttons.add(new CustomButton(5, 145, 30, 30, Color.BLUE, true) {
 			@Override
 			public void performAction() {
@@ -217,11 +219,17 @@ public class PaintApp extends JFrame implements Runnable {
 		}
 	}
 
+	/**
+	 * Processes a left mouse click
+	 * @param initialClick whether or not the click is the first or held down
+	 */
 	private void processMouseLeftClick(boolean initialClick) {
 		if (initialClick) {
 			for (CustomButton button : buttons) {
 				if (button.contains(mouse.getPosition())) {
+					// Handle button click
 					button.performAction();
+					// Cleanup if shape was being previewed/unfinished
 					if (!shapes.isEmpty()) {
 						Shape lastShape = shapes.get(shapes.size() - 1);
 						if (lastShape.isPreviewing()) {
@@ -240,6 +248,10 @@ public class PaintApp extends JFrame implements Runnable {
 		selectedTool.processInput(new ToolClick(initialClick, false, selectedColor, point, shapes));
 	}
 	
+	/**
+	 * Processes a right mouse click
+	 * @param initialClick whether or not the click is the first or held down
+	 */
 	private void processMouseRightClick(boolean initialClick) {
 		if (selectedTool == null) {
 			return;
@@ -257,13 +269,16 @@ public class PaintApp extends JFrame implements Runnable {
 	}
 
 	private void render(Graphics g) { //Mostly the same
+		// Draw shapes
 		for (Shape shape : shapes) {
 			shape.draw(g);
 		}
+		// Draw toolbar
 		g.setColor(Color.BLACK);
-		g.drawRect(0, 0, 40, 285); // Toolbar
+		g.drawRect(0, 0, 40, 285);
 		g.setColor(Color.WHITE);
 		g.fillRect(1, 1, 39, 284);
+		// Draw buttons
 		for (CustomButton button : buttons) {
 			button.draw(g);
 			if (button instanceof ToolButton) {
@@ -272,6 +287,7 @@ public class PaintApp extends JFrame implements Runnable {
 				}
 			}
 		}
+		// Draw cursor
 		drawCursor(g);
 	}
 	
@@ -281,6 +297,9 @@ public class PaintApp extends JFrame implements Runnable {
 		g.drawLine(point.x + CURSOR_RADIUS, point.y, point.x - CURSOR_RADIUS, point.y);
 	}
 	
+	/**
+	 * Clears the canvas of all shapes
+	 */
 	private void clearCanvas() {
 		shapes.clear();
 	}
