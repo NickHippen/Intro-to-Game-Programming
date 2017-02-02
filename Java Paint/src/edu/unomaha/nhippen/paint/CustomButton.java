@@ -64,5 +64,10 @@ public abstract class CustomButton implements Drawable {
 	public void setColor(Color color) {
 		this.color = color;
 	}
+	
+	public void markSelected(Graphics g) {
+		g.setColor(Color.GREEN);
+		g.drawRect(this.rectangle.x, this.rectangle.y, this.rectangle.width, this.rectangle.height);
+	}
 
 }

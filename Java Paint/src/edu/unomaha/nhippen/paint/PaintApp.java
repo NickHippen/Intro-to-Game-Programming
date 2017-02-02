@@ -72,33 +72,33 @@ public class PaintApp extends JFrame implements Runnable {
 		canvas.addMouseWheelListener(mouse);
 
 		// Add buttons to toggle tools/colors
-		buttons.add(new CustomButton(5, 5, 30, 30,
+		buttons.add(new ToolButton(Tool.LINE, 5, 5, 30, 30,
 				new Line(new Point(5, 35),
 						new Point(35, 5))) {
 			@Override
 			public void performAction() {
-				selectedTool = Tool.LINE;
+				selectedTool = getTool();
 			}
 		});
-		buttons.add(new CustomButton(5, 40, 30, 30,
+		buttons.add(new ToolButton(Tool.RECTANGLE, 5, 40, 30, 30,
 				new Rectangle(new Point(10, 45),
 						new Point(30, 65))) {
 			@Override
 			public void performAction() {
-				selectedTool = Tool.RECTANGLE;
+				selectedTool = getTool();
 			}
 		});
-		buttons.add(new CustomButton(5, 75, 30, 30,
+		buttons.add(new ToolButton(Tool.POLY_LINE, 5, 75, 30, 30,
 				new FreeLine(new Point(10, 100),
 						new Point(16, 90),
 						new Point(22, 100),
 						new Point(28, 80))) {
 			@Override
 			public void performAction() {
-				selectedTool = Tool.POLY_LINE;
+				selectedTool = getTool();
 			}
 		});
-		buttons.add(new CustomButton(5, 110, 30, 30,
+		buttons.add(new ToolButton(Tool.FREE_LINE, 5, 110, 30, 30,
 				new FreeLine(new Point(10, 135),
 						new Point(10, 115),
 						new Point(25, 115),
@@ -107,7 +107,7 @@ public class PaintApp extends JFrame implements Runnable {
 						new Point(20, 123))) {
 			@Override
 			public void performAction() {
-				selectedTool = Tool.FREE_LINE;
+				selectedTool = getTool();
 			}
 		});
 		buttons.add(new CustomButton(5, 145, 30, 30, Color.BLUE, true) {
@@ -213,7 +213,7 @@ public class PaintApp extends JFrame implements Runnable {
 		}
 		
 		if (keys.keyDownOnce(KeyEvent.VK_C)) {
-			shapes.clear();
+			clearCanvas();
 		}
 	}
 
@@ -266,6 +266,11 @@ public class PaintApp extends JFrame implements Runnable {
 		g.fillRect(1, 1, 39, 284);
 		for (CustomButton button : buttons) {
 			button.draw(g);
+			if (button instanceof ToolButton) {
+				if (((ToolButton) button).getTool().equals(selectedTool)) {
+					button.markSelected(g);
+				}
+			}
 		}
 		drawCursor(g);
 	}
@@ -274,6 +279,10 @@ public class PaintApp extends JFrame implements Runnable {
 		g.setColor(selectedColor);
 		g.drawLine(point.x, point.y + CURSOR_RADIUS, point.x, point.y - CURSOR_RADIUS);
 		g.drawLine(point.x + CURSOR_RADIUS, point.y, point.x - CURSOR_RADIUS, point.y);
+	}
+	
+	private void clearCanvas() {
+		shapes.clear();
 	}
 
 	@Override
