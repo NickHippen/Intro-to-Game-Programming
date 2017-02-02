@@ -11,6 +11,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferStrategy;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.JFrame;
@@ -29,6 +30,9 @@ public class PaintApp extends JFrame implements Runnable {
 	private static final int WIDTH_Y = 720;
 	
 	private static final int CURSOR_RADIUS = 10;
+	
+	private static final List<Color> COLORS = Arrays.asList(Color.BLUE, Color.RED, Color.GREEN, Color.BLACK);
+	private static final List<Tool> TOOLS = Arrays.asList(Tool.LINE, Tool.RECTANGLE, Tool.POLY_LINE, Tool.FREE_LINE);
 
 	private BufferStrategy bs;
 	private volatile boolean running;
@@ -38,7 +42,7 @@ public class PaintApp extends JFrame implements Runnable {
 	private KeyboardInput keys;
 	private Point point = new Point(0, 0);
 	private List<CustomButton> buttons = new ArrayList<>();
-	private Tool selectedTool = null;
+	private Tool selectedTool = Tool.LINE;
 	private Color selectedColor = Color.BLACK;
 	private List<Shape> shapes = new ArrayList<>();
 
@@ -213,10 +217,47 @@ public class PaintApp extends JFrame implements Runnable {
 		} else if (mouse.buttonDown(MouseEvent.BUTTON3)) {
 			processMouseRightClick(false);
 		}
+		if (mouse.getNotches() < 0) {
+			changeTool();
+		} else if (mouse.getNotches() > 0) {
+			changeColor();
+		}
 		
 		if (keys.keyDownOnce(KeyEvent.VK_C)) {
 			clearCanvas();
 		}
+	}
+	
+	private void changeTool() {
+		if (selectedTool == null) {
+			selectedTool = Tool.LINE;
+			return;
+		}
+		int i = TOOLS.indexOf(selectedTool);
+		if (i == -1) {
+			selectedTool = Tool.LINE;
+		}
+		i++;
+		if (i >= TOOLS.size()) {
+			i = 0;
+		}
+		selectedTool = TOOLS.get(i);
+	}
+	
+	private void changeColor() {
+		if (selectedColor == null) {
+			selectedColor = Color.BLACK;
+			return;
+		}
+		int i = COLORS.indexOf(selectedColor);
+		if (i == -1) {
+			selectedColor = Color.BLACK;
+		}
+		i++;
+		if (i >= COLORS.size()) {
+			i = 0;
+		}
+		selectedColor = COLORS.get(i);
 	}
 
 	/**
