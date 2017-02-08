@@ -26,6 +26,9 @@ public class MatrixTransformationApplication extends JFrame implements Runnable 
 	private VectorObject automaticObject;
 	private VectorObject keyboardObject;
 	private VectorObject mouseObject;
+	
+	private int deltaX = 1;
+	private int deltaY = -1;
 
 	public MatrixTransformationApplication() {
 	}
@@ -97,17 +100,34 @@ public class MatrixTransformationApplication extends JFrame implements Runnable 
 	}
 
 	private void initialize() {
-		automaticObject = new VectorObject(Arrays.asList(new Vector2f(10, 0), new Vector2f(-10, 8),
-				new Vector2f(0, 0), new Vector2f(-10, -8)));
+		automaticObject = new VectorObject(Arrays.asList(new Vector2f(10, 10), new Vector2f(-10, 10),
+				new Vector2f(-10, -10), new Vector2f(10, -10)));
 		automaticObject.setColor(Color.RED);
 		automaticObject.setLocation(new Point(SCREEN_W / 2, SCREEN_H / 2));
-//		automaticObject.setScale(0.4F);
+		automaticObject.setScale(2.5F);
+		
 	}
 
 	private void processInput() {
 		keyboard.poll();
 		mouse.poll();
-		automaticObject.setLocation(mouse.getPosition());
+		int objectRadius = (int) automaticObject.getRadius();
+//		int objectRadius = 25;
+		if (automaticObject.getLocation().x < objectRadius) {
+			deltaX = 1;
+		}
+		if (automaticObject.getLocation().x > SCREEN_W - objectRadius) {
+			deltaX = -1;
+		}
+		if (automaticObject.getLocation().y < objectRadius) {
+			deltaY = 1;
+		}
+		if (automaticObject.getLocation().y > SCREEN_H - objectRadius) {
+			deltaY = -1;
+		}
+
+		automaticObject.setLocation(
+				new Point(automaticObject.getLocation().x + deltaX, automaticObject.getLocation().y + deltaY));
 		if (keyboard.keyDownOnce(KeyEvent.VK_R)) {
 		}
 		if (keyboard.keyDownOnce(KeyEvent.VK_S)) {
@@ -120,10 +140,11 @@ public class MatrixTransformationApplication extends JFrame implements Runnable 
 		}
 		if (keyboard.keyDownOnce(KeyEvent.VK_SPACE)) {
 		}
+		automaticObject.updateWorld();
 	}
 
 	private void processObjects() {
-		automaticObject.updateWorld();
+//		automaticObject.updateWorld();
 	}
 
 	private void render(Graphics g) {
