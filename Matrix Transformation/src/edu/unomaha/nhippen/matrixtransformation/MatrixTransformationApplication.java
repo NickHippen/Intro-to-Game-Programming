@@ -2,13 +2,18 @@ package edu.unomaha.nhippen.matrixtransformation;
 
 import java.awt.Canvas;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Graphics;
+import java.awt.Image;
 import java.awt.Point;
+import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferStrategy;
 import java.util.Arrays;
+import java.util.List;
 
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
@@ -29,6 +34,8 @@ public class MatrixTransformationApplication extends JFrame implements Runnable 
 	
 	private int deltaX = 1;
 	private int deltaY = -1;
+	
+	private float rotationSpeed = 0.01F;
 
 	public MatrixTransformationApplication() {
 	}
@@ -36,7 +43,7 @@ public class MatrixTransformationApplication extends JFrame implements Runnable 
 	protected void createAndShowGUI() {
 		Canvas canvas = new Canvas();
 		canvas.setSize(SCREEN_W, SCREEN_H);
-		canvas.setBackground(Color.WHITE);
+		canvas.setBackground(Color.BLACK);
 		canvas.setIgnoreRepaint(true);
 		getContentPane().add(canvas);
 		setTitle("Matrix Transformation");
@@ -100,55 +107,148 @@ public class MatrixTransformationApplication extends JFrame implements Runnable 
 	}
 
 	private void initialize() {
-		automaticObject = new VectorObject(Arrays.asList(new Vector2f(10, 10), new Vector2f(-10, 10),
-				new Vector2f(-10, -10), new Vector2f(10, -10)));
-		automaticObject.setColor(Color.RED);
+		// Automatic Object
+		automaticObject = new VectorObject(4);
+		automaticObject.setColor(Color.BLUE);
 		automaticObject.setLocation(new Point(SCREEN_W / 2, SCREEN_H / 2));
-		automaticObject.setScale(2.5F);
 		
+		// Keyboard Controlled Object
+		keyboardObject = new VectorObject(6);
+		keyboardObject.setColor(Color.RED);
+		keyboardObject.setLocation(new Point(SCREEN_W / 2, SCREEN_H / 2));
+		keyboardObject.setRotation(0.01F);
+		
+		// Mouse Controller Object
+		mouseObject = new VectorObject(3);
+		mouseObject.setColor(Color.GREEN);
+		mouseObject.setLocation(new Point(SCREEN_W / 2, SCREEN_H / 2));
+		
+		disableCursor();
+	}
+	
+	private void disableCursor() {
+		Toolkit tk = Toolkit.getDefaultToolkit();
+		Image image = tk.createImage("");
+		Point point = new Point(0, 0);
+		String name = "CanBeAnything";
+		Cursor cursor = tk.createCustomCursor(image, point, name);
+		setCursor(cursor);
 	}
 
 	private void processInput() {
 		keyboard.poll();
 		mouse.poll();
-		int objectRadius = (int) automaticObject.getRadius();
-//		int objectRadius = 25;
-		if (automaticObject.getLocation().x < objectRadius) {
-			deltaX = 1;
+		
+		// Automatic Object
+		List<Vector2f> adjustedPoints = automaticObject.getAdjustedPoints();
+		for (Vector2f point : adjustedPoints) {
+			if (point.x >= SCREEN_W) {
+				deltaX = -1;
+			} else if (point.x <= 0) {
+				deltaX = 1;
+			}
+			if (point.y >= SCREEN_H) {
+				deltaY = -1;
+			} else if (point.y <= 0) {
+				deltaY = 1;
+			}
 		}
-		if (automaticObject.getLocation().x > SCREEN_W - objectRadius) {
-			deltaX = -1;
-		}
-		if (automaticObject.getLocation().y < objectRadius) {
-			deltaY = 1;
-		}
-		if (automaticObject.getLocation().y > SCREEN_H - objectRadius) {
-			deltaY = -1;
-		}
-
 		automaticObject.setLocation(
 				new Point(automaticObject.getLocation().x + deltaX, automaticObject.getLocation().y + deltaY));
-		if (keyboard.keyDownOnce(KeyEvent.VK_R)) {
+		
+		// Keyboard Controlled Object
+		if(keyboard.keyDownOnce(KeyEvent.VK_Q)){
+			rotationSpeed *= .9;
 		}
-		if (keyboard.keyDownOnce(KeyEvent.VK_S)) {
+		if(keyboard.keyDownOnce(KeyEvent.VK_E)) {
+			rotationSpeed *= 1.1;
 		}
-		if (keyboard.keyDownOnce(KeyEvent.VK_T)) {
-		}
-		if (keyboard.keyDownOnce(KeyEvent.VK_X)) {
-		}
-		if (keyboard.keyDownOnce(KeyEvent.VK_Y)) {
-		}
+		keyboardObject.setRotation(rotationSpeed+keyboardObject.getRotation());
 		if (keyboard.keyDownOnce(KeyEvent.VK_SPACE)) {
+			// Flip rotation
+			rotationSpeed *= -1;
 		}
-		automaticObject.updateWorld();
+		// Check bounds for movement
+		boolean allowUp = true;
+		boolean allowLeft = true;
+		boolean allowDown = true;
+		boolean allowRight = true;
+		for (Vector2f point : keyboardObject.getAdjustedPoints()) {
+			if (point.x <= 0) {
+				allowLeft = false;
+				if (point.x < 0) {
+					keyboardObject.setLocation(
+							new Point(keyboardObject.getLocation().x - (int) point.x, keyboardObject.getLocation().y));
+				}
+			}
+			if (point.x >= SCREEN_W) {
+				allowRight = false;
+				if (point.x > SCREEN_W) {
+					keyboardObject.setLocation(
+							new Point(keyboardObject.getLocation().x - ((int) point.x - SCREEN_W), keyboardObject.getLocation().y));
+				}
+			}
+			if (point.y <= 0) {
+				allowUp = false;
+				if (point.y < 0) {
+					keyboardObject.setLocation(
+							new Point(keyboardObject.getLocation().x, keyboardObject.getLocation().y - (int) point.y));
+				}
+			}
+			if (point.y >= SCREEN_H) {
+				allowDown = false;
+				if (point.y > SCREEN_H) {
+					keyboardObject.setLocation(
+							new Point(keyboardObject.getLocation().x, keyboardObject.getLocation().y - ((int) point.y - SCREEN_H)));
+				}
+			}
+		}
+		if (keyboard.keyDown(KeyEvent.VK_W)) {
+			if (allowUp) {
+				keyboardObject.setLocation(
+						new Point(keyboardObject.getLocation().x, keyboardObject.getLocation().y - 1));
+			}
+		}
+		if (keyboard.keyDown(KeyEvent.VK_A)) {
+			if (allowLeft) {
+				keyboardObject.setLocation(
+						new Point(keyboardObject.getLocation().x - 1, keyboardObject.getLocation().y));
+			}
+		}
+		if (keyboard.keyDown(KeyEvent.VK_S)) {
+			if (allowDown) {
+				keyboardObject.setLocation(
+						new Point(keyboardObject.getLocation().x, keyboardObject.getLocation().y + 1));
+			}
+		}
+		if (keyboard.keyDown(KeyEvent.VK_D)) {
+			if (allowRight) {
+				keyboardObject.setLocation(
+						new Point(keyboardObject.getLocation().x + 1, keyboardObject.getLocation().y));
+			}
+		}
+		keyboardObject.setRotation(keyboardObject.getRotation() + rotationSpeed);
+		
+		// Mouse Controlled Object
+		if (mouse.buttonDown(MouseEvent.BUTTON1)) {
+			mouseObject.setRotation(mouseObject.getRotation() - 0.05F);
+		}
+		if (mouse.buttonDown(MouseEvent.BUTTON3)) {
+			mouseObject.setRotation(mouseObject.getRotation() + 0.05F);
+		}
+		mouseObject.setLocation(mouse.getPosition());
 	}
 
 	private void processObjects() {
-//		automaticObject.updateWorld();
+		automaticObject.updateWorld();
+		keyboardObject.updateWorld();
+		mouseObject.updateWorld();
 	}
 
 	private void render(Graphics g) {
 		automaticObject.render(g);
+		keyboardObject.render(g);
+		mouseObject.render(g);
 	}
 
 	protected void onWindowClosing() {
