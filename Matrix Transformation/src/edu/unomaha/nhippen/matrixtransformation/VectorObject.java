@@ -8,6 +8,9 @@ import java.util.List;
 
 public class VectorObject implements Drawable {
 
+	/**
+	 * The radius of the polygons created
+	 */
 	public static final float BASE_RADIUS = 75;
 	
 	private Matrix3x3f world;
@@ -73,6 +76,11 @@ public class VectorObject implements Drawable {
 		this.rotation = rotation;
 	}
 	
+	/**
+	 * Generates the vectors that make up a polygon with the specified number of sides
+	 * @param sides the number of sides
+	 * @return the vectors of the polygon
+	 */
 	private List<Vector2f> generatePolygonPoints(int sides) {
 		List<Vector2f> points = new ArrayList<>(sides);
 		for (int  i = 0; i < sides; i++) {
@@ -83,6 +91,10 @@ public class VectorObject implements Drawable {
 		return points;
 	}
 	
+	/**
+	 * Gets the points adjusted for the VectorObject's properties
+	 * @return the points adjusted for the VectorObject's properties
+	 */
 	public List<Vector2f> getAdjustedPoints() {
 		List<Vector2f> adjustedPoints = new ArrayList<>();
 		for (Vector2f point : this.points) {

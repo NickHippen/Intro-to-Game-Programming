@@ -12,7 +12,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferStrategy;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.JFrame;
@@ -158,10 +157,12 @@ public class MatrixTransformationApplication extends JFrame implements Runnable 
 		
 		// Keyboard Controlled Object
 		if(keyboard.keyDownOnce(KeyEvent.VK_Q)){
-			rotationSpeed *= .9;
+			// Decrease speed by 20%
+			rotationSpeed *= .8;
 		}
 		if(keyboard.keyDownOnce(KeyEvent.VK_E)) {
-			rotationSpeed *= 1.1;
+			// Increase speed by 20%
+			rotationSpeed *= 1.2;
 		}
 		keyboardObject.setRotation(rotationSpeed+keyboardObject.getRotation());
 		if (keyboard.keyDownOnce(KeyEvent.VK_SPACE)) {
@@ -177,6 +178,7 @@ public class MatrixTransformationApplication extends JFrame implements Runnable 
 			if (point.x <= 0) {
 				allowLeft = false;
 				if (point.x < 0) {
+					// Out of bounds now, push back
 					keyboardObject.setLocation(
 							new Point(keyboardObject.getLocation().x - (int) point.x, keyboardObject.getLocation().y));
 				}
@@ -184,6 +186,7 @@ public class MatrixTransformationApplication extends JFrame implements Runnable 
 			if (point.x >= SCREEN_W) {
 				allowRight = false;
 				if (point.x > SCREEN_W) {
+					// Out of bounds now, push back
 					keyboardObject.setLocation(
 							new Point(keyboardObject.getLocation().x - ((int) point.x - SCREEN_W), keyboardObject.getLocation().y));
 				}
@@ -191,6 +194,7 @@ public class MatrixTransformationApplication extends JFrame implements Runnable 
 			if (point.y <= 0) {
 				allowUp = false;
 				if (point.y < 0) {
+					// Out of bounds now, push back
 					keyboardObject.setLocation(
 							new Point(keyboardObject.getLocation().x, keyboardObject.getLocation().y - (int) point.y));
 				}
@@ -198,6 +202,7 @@ public class MatrixTransformationApplication extends JFrame implements Runnable 
 			if (point.y >= SCREEN_H) {
 				allowDown = false;
 				if (point.y > SCREEN_H) {
+					// Out of bounds now, push back
 					keyboardObject.setLocation(
 							new Point(keyboardObject.getLocation().x, keyboardObject.getLocation().y - ((int) point.y - SCREEN_H)));
 				}
@@ -239,6 +244,9 @@ public class MatrixTransformationApplication extends JFrame implements Runnable 
 		mouseObject.setLocation(mouse.getPosition());
 	}
 
+	/**
+	 * Updates the objects based on their attributes
+	 */
 	private void processObjects() {
 		automaticObject.updateWorld();
 		keyboardObject.updateWorld();
