@@ -7,45 +7,50 @@ import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Toolkit;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferStrategy;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
+import edu.unomaha.nhippen.cannonball.vectors.Meteor;
+import edu.unomaha.nhippen.cannonball.vectors.VectorObject;
+
 public class CannonBallApplication extends JFrame implements Runnable {
 	
-	private static final int SCREEN_W = 1280;
-	private static final int SCREEN_H = 720;
+	public static final int SCREEN_W = 1280;
+	public static final int SCREEN_H = 720;
+	private static final int CURSOR_RADIUS = 10;
+	private static final Random RANDOM = new Random();
+	
 	private BufferStrategy bs;
 	private volatile boolean running;
 	private Thread gameThread;
 	private RelativeMouseInput mouse;
 	private KeyboardInput keyboard;
 	
-	private VectorObject automaticObject;
-	private VectorObject keyboardObject;
-	private VectorObject mouseObject;
+	private List<VectorObject> vectorObjects;
 	
-	private int deltaX = 1;
-	private int deltaY = -1;
+	private double totalDelta = 0;
+	private double meteorRate = 5; // How many seconds between each meteor spawn
+	private double wind = 100;
 	
-	private float rotationSpeed = 0.01F;
-
+	private long score;
+	
 	public CannonBallApplication() {
 	}
 
 	protected void createAndShowGUI() {
 		Canvas canvas = new Canvas();
 		canvas.setSize(SCREEN_W, SCREEN_H);
-		canvas.setBackground(Color.BLACK);
+		canvas.setBackground(Color.WHITE);
 		canvas.setIgnoreRepaint(true);
 		getContentPane().add(canvas);
-		setTitle("Matrix Transformation");
+		setTitle("Cannon Ball Command");
 		setIgnoreRepaint(true);
 		pack();
 		// Add key listeners
@@ -68,14 +73,20 @@ public class CannonBallApplication extends JFrame implements Runnable {
 	public void run() {
 		running = true;
 		initialize();
+		long curTime = System.nanoTime();
+		long lastTime = curTime;
+		double nsPerFrame;
 		while (running) {
-			gameLoop();
+			curTime = System.nanoTime();
+			nsPerFrame = curTime - lastTime;
+			gameLoop(nsPerFrame / 1.0E9);
+			lastTime = curTime;
 		}
 	}
 
-	private void gameLoop() {
-		processInput();
-		processObjects();
+	private void gameLoop(double delta) {
+		processInput(delta);
+		updateObjects(delta);
 		renderFrame();
 		sleep(10L);
 	}
@@ -106,22 +117,7 @@ public class CannonBallApplication extends JFrame implements Runnable {
 	}
 
 	private void initialize() {
-		// Automatic Object
-		automaticObject = new VectorObject(4);
-		automaticObject.setColor(Color.BLUE);
-		automaticObject.setLocation(new Point(SCREEN_W / 2, SCREEN_H / 2));
-		
-		// Keyboard Controlled Object
-		keyboardObject = new VectorObject(6);
-		keyboardObject.setColor(Color.RED);
-		keyboardObject.setLocation(new Point(SCREEN_W / 2, SCREEN_H / 2));
-		keyboardObject.setRotation(0.01F);
-		
-		// Mouse Controller Object
-		mouseObject = new VectorObject(3);
-		mouseObject.setColor(Color.GREEN);
-		mouseObject.setLocation(new Point(SCREEN_W / 2, SCREEN_H / 2));
-		
+		vectorObjects = new ArrayList<>();
 		disableCursor();
 	}
 	
@@ -133,130 +129,44 @@ public class CannonBallApplication extends JFrame implements Runnable {
 		Cursor cursor = tk.createCustomCursor(image, point, name);
 		setCursor(cursor);
 	}
+	
+	private void drawCursor(Graphics g) {
+		g.setColor(Color.BLACK);
+		g.drawLine(mouse.getPosition().x, mouse.getPosition().y + CURSOR_RADIUS, mouse.getPosition().x, mouse.getPosition().y - CURSOR_RADIUS);
+		g.drawLine(mouse.getPosition().x + CURSOR_RADIUS, mouse.getPosition().y, mouse.getPosition().x - CURSOR_RADIUS, mouse.getPosition().y);
+	}
 
-	private void processInput() {
+	private void processInput(double delta) {
 		keyboard.poll();
 		mouse.poll();
-		
-		// Automatic Object
-		List<Vector2f> adjustedPoints = automaticObject.getAdjustedPoints();
-		for (Vector2f point : adjustedPoints) {
-			if (point.x >= SCREEN_W) {
-				deltaX = -1;
-			} else if (point.x <= 0) {
-				deltaX = 1;
-			}
-			if (point.y >= SCREEN_H) {
-				deltaY = -1;
-			} else if (point.y <= 0) {
-				deltaY = 1;
-			}
-		}
-		automaticObject.setLocation(
-				new Point(automaticObject.getLocation().x + deltaX, automaticObject.getLocation().y + deltaY));
-		
-		// Keyboard Controlled Object
-		if(keyboard.keyDownOnce(KeyEvent.VK_Q)){
-			// Decrease speed by 20%
-			rotationSpeed *= .8;
-		}
-		if(keyboard.keyDownOnce(KeyEvent.VK_E)) {
-			// Increase speed by 20%
-			rotationSpeed *= 1.2;
-		}
-		keyboardObject.setRotation(rotationSpeed+keyboardObject.getRotation());
-		if (keyboard.keyDownOnce(KeyEvent.VK_SPACE)) {
-			// Flip rotation
-			rotationSpeed *= -1;
-		}
-		// Check bounds for movement
-		boolean allowUp = true;
-		boolean allowLeft = true;
-		boolean allowDown = true;
-		boolean allowRight = true;
-		for (Vector2f point : keyboardObject.getAdjustedPoints()) {
-			if (point.x <= 0) {
-				allowLeft = false;
-				if (point.x < 0) {
-					// Out of bounds now, push back
-					keyboardObject.setLocation(
-							new Point(keyboardObject.getLocation().x - (int) point.x, keyboardObject.getLocation().y));
-				}
-			}
-			if (point.x >= SCREEN_W) {
-				allowRight = false;
-				if (point.x > SCREEN_W) {
-					// Out of bounds now, push back
-					keyboardObject.setLocation(
-							new Point(keyboardObject.getLocation().x - ((int) point.x - SCREEN_W), keyboardObject.getLocation().y));
-				}
-			}
-			if (point.y <= 0) {
-				allowUp = false;
-				if (point.y < 0) {
-					// Out of bounds now, push back
-					keyboardObject.setLocation(
-							new Point(keyboardObject.getLocation().x, keyboardObject.getLocation().y - (int) point.y));
-				}
-			}
-			if (point.y >= SCREEN_H) {
-				allowDown = false;
-				if (point.y > SCREEN_H) {
-					// Out of bounds now, push back
-					keyboardObject.setLocation(
-							new Point(keyboardObject.getLocation().x, keyboardObject.getLocation().y - ((int) point.y - SCREEN_H)));
-				}
-			}
-		}
-		if (keyboard.keyDown(KeyEvent.VK_W)) {
-			if (allowUp) {
-				keyboardObject.setLocation(
-						new Point(keyboardObject.getLocation().x, keyboardObject.getLocation().y - 1));
-			}
-		}
-		if (keyboard.keyDown(KeyEvent.VK_A)) {
-			if (allowLeft) {
-				keyboardObject.setLocation(
-						new Point(keyboardObject.getLocation().x - 1, keyboardObject.getLocation().y));
-			}
-		}
-		if (keyboard.keyDown(KeyEvent.VK_S)) {
-			if (allowDown) {
-				keyboardObject.setLocation(
-						new Point(keyboardObject.getLocation().x, keyboardObject.getLocation().y + 1));
-			}
-		}
-		if (keyboard.keyDown(KeyEvent.VK_D)) {
-			if (allowRight) {
-				keyboardObject.setLocation(
-						new Point(keyboardObject.getLocation().x + 1, keyboardObject.getLocation().y));
-			}
-		}
-		keyboardObject.setRotation(keyboardObject.getRotation() + rotationSpeed);
-		
-		// Mouse Controlled Object
-		if (mouse.buttonDown(MouseEvent.BUTTON1)) {
-			mouseObject.setRotation(mouseObject.getRotation() - 0.05F);
-		}
-		if (mouse.buttonDown(MouseEvent.BUTTON3)) {
-			mouseObject.setRotation(mouseObject.getRotation() + 0.05F);
-		}
-		mouseObject.setLocation(mouse.getPosition());
 	}
 
 	/**
 	 * Updates the objects based on their attributes
 	 */
-	private void processObjects() {
-		automaticObject.updateWorld();
-		keyboardObject.updateWorld();
-		mouseObject.updateWorld();
+	private void updateObjects(double delta) {
+		totalDelta += delta;
+		if (totalDelta > meteorRate) {
+			Meteor meteor = new Meteor(new Point(RANDOM.nextInt(SCREEN_W - 100) + 50, 0), 50);
+			vectorObjects.add(meteor);
+			totalDelta = 0;
+		}
+		for (int i = vectorObjects.size() - 1; i >= 0; i--) {
+			VectorObject vectorObject = vectorObjects.get(i);
+			if (vectorObject.isDeleted()) {
+				vectorObjects.remove(i);
+			}
+			vectorObject.updateObject(delta);
+		}
 	}
 
 	private void render(Graphics g) {
-		automaticObject.render(g);
-		keyboardObject.render(g);
-		mouseObject.render(g);
+		for (VectorObject vectorObject : vectorObjects) {
+			vectorObject.render(g);
+		}
+		
+		g.drawString("Score: " + score, 10, 10);
+		drawCursor(g);
 	}
 
 	protected void onWindowClosing() {
