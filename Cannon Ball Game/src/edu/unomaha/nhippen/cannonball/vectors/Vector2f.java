@@ -1,4 +1,4 @@
-package edu.unomaha.nhippen.cannonball;
+package edu.unomaha.nhippen.cannonball.vectors;
 
 public class Vector2f {
 	public float x;
@@ -51,6 +51,50 @@ public class Vector2f {
 		x = tmp;
 	}
 	
+	public Vector2f inv() {
+		return new Vector2f(-x, -y);
+	}
+	
+	public Vector2f add(Vector2f v) {
+		return new Vector2f(x + v.x, y + v.y);
+	}
+	
+	public Vector2f sub(Vector2f v) {
+		return new Vector2f(x - v.x, y - v.y);
+	}
+	
+	public Vector2f mul(float scalar) {
+		return new Vector2f(scalar * x, scalar * y);
+	}
+
+	public Vector2f div(float scalar) {
+		return new Vector2f(x / scalar, y / scalar);
+	}
+	
+	public float len() {
+		return (float) Math.sqrt(x * x + y * y);
+	}
+	
+	public float lenSqr() {
+		return x * x + y * y;
+	}
+	
+	public Vector2f norm() {
+		return div(len());
+	}
+	
+	public Vector2f perp() {
+		return new Vector2f(-y, x);
+	}
+
+	public float dot(Vector2f v) {
+		return x * v.x + y * v.y;
+	}
+
+	public float angle() {
+		return (float) Math.atan2(y, x);
+	}
+
 	@Override
 	public String toString() {
 		return "{" + x + ", " + y + ", " + w + "}";

@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Point;
 
 import edu.unomaha.nhippen.cannonball.Drawable;
-import edu.unomaha.nhippen.cannonball.Matrix3x3f;
 
 public abstract class VectorObject implements Drawable {
 

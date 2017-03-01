@@ -5,9 +5,6 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.unomaha.nhippen.cannonball.Matrix3x3f;
-import edu.unomaha.nhippen.cannonball.Vector2f;
-
 public class PointVectorObject extends VectorObject {
 
 	private List<Vector2f> points;

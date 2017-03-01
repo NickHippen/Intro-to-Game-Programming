@@ -3,8 +3,6 @@ package edu.unomaha.nhippen.cannonball.vectors;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.unomaha.nhippen.cannonball.Vector2f;
-
 public class RegularPolygonObject extends PointVectorObject {
 	
 	private int radius;

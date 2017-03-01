@@ -7,7 +7,8 @@ import edu.unomaha.nhippen.cannonball.CannonBallApplication;
 public class Meteor extends CircleObject {
 
 	private double speed;
-	private double wind;
+	private double wind = 0;
+	private double deltaX;
 	
 	public Meteor(Point center, int radius) {
 		super(center, radius);
@@ -36,7 +37,14 @@ public class Meteor extends CircleObject {
 			return;
 		}
 		getLocation().y += speed * delta;
-		getLocation().x += wind * delta;
+		deltaX += wind * delta;
+		if (deltaX > 1) {
+			getLocation().x += 1;
+			deltaX -= 1;
+		} else if (deltaX < 1) {
+			getLocation().x -= 1;
+			deltaX += 1;
+		}
 		if (getLocation().y >= CannonBallApplication.SCREEN_H) {
 			setDeleted(true);
 		}

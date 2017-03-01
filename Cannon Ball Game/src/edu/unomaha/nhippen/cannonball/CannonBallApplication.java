@@ -7,6 +7,8 @@ import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Toolkit;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferStrategy;
@@ -17,6 +19,7 @@ import java.util.Random;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
+import edu.unomaha.nhippen.cannonball.vectors.CityBlock;
 import edu.unomaha.nhippen.cannonball.vectors.Meteor;
 import edu.unomaha.nhippen.cannonball.vectors.VectorObject;
 
@@ -27,17 +30,26 @@ public class CannonBallApplication extends JFrame implements Runnable {
 	private static final int CURSOR_RADIUS = 10;
 	private static final Random RANDOM = new Random();
 	
+	private static final int CITY_COUNT = 8;
+	private static final double WIND_CHANGE_RATE = 4;
+	private static final double WIND_UPDATE_RATE = 0.5;
+	
 	private BufferStrategy bs;
 	private volatile boolean running;
 	private Thread gameThread;
 	private RelativeMouseInput mouse;
 	private KeyboardInput keyboard;
 	
-	private List<VectorObject> vectorObjects;
+	private List<Meteor> meteors;
+	private List<CityBlock> cityBlocks;
 	
-	private double totalDelta = 0;
+	private boolean started = false;
 	private double meteorRate = 5; // How many seconds between each meteor spawn
-	private double wind = 100;
+	private double meteorSpawnTime = meteorRate;
+	private double wind = 0;
+	private double windDelta = 0;
+	private double windChangeTime = 0;
+	private double windUpdateTime = 0;
 	
 	private long score;
 	
@@ -86,7 +98,10 @@ public class CannonBallApplication extends JFrame implements Runnable {
 
 	private void gameLoop(double delta) {
 		processInput(delta);
-		updateObjects(delta);
+		if (started) {
+			updateProperties(delta);
+			updateObjects(delta);
+		}
 		renderFrame();
 		sleep(10L);
 	}
@@ -117,7 +132,8 @@ public class CannonBallApplication extends JFrame implements Runnable {
 	}
 
 	private void initialize() {
-		vectorObjects = new ArrayList<>();
+		meteors = new ArrayList<>();
+		cityBlocks = new ArrayList<>();
 		disableCursor();
 	}
 	
@@ -139,33 +155,98 @@ public class CannonBallApplication extends JFrame implements Runnable {
 	private void processInput(double delta) {
 		keyboard.poll();
 		mouse.poll();
+		
+		if (keyboard.keyDownOnce(KeyEvent.VK_SPACE)) {
+			startGame();
+		}
+		
+		if (mouse.buttonDownOnce(MouseEvent.BUTTON1)) {
+			for (Meteor meteor : meteors) {
+				if (meteor.isPointInCircle(mouse.getPosition())) {
+					score += 100;
+					meteor.setDeleted(true);
+				}
+			}
+		}
+	}
+	
+	public void startGame() {
+		started = true;
+		
+		for (int i = 0; i < CITY_COUNT; i++) {
+			CityBlock cityBlock = new CityBlock();
+			cityBlock.setLocation(new Point(i * 160, SCREEN_H));
+			cityBlocks.add(cityBlock);
+		}
 	}
 
+	/**
+	 * Updates the properties of the game
+	 */
+	private void updateProperties(double delta) {
+		windChangeTime += delta;
+		if (windChangeTime >= WIND_CHANGE_RATE) {
+			windDelta = RANDOM.nextDouble() - 0.5;
+			windChangeTime -= WIND_CHANGE_RATE;
+		}
+		windUpdateTime += delta;
+		if (windUpdateTime >= WIND_UPDATE_RATE) {
+			wind += windDelta;
+			windUpdateTime -= WIND_UPDATE_RATE;
+		}
+	}
+	
 	/**
 	 * Updates the objects based on their attributes
 	 */
 	private void updateObjects(double delta) {
-		totalDelta += delta;
-		if (totalDelta > meteorRate) {
-			Meteor meteor = new Meteor(new Point(RANDOM.nextInt(SCREEN_W - 100) + 50, 0), 50);
-			vectorObjects.add(meteor);
-			totalDelta = 0;
+		meteorSpawnTime += delta;
+		if (meteorSpawnTime >= meteorRate) {
+			Meteor meteor = new Meteor(new Point(RANDOM.nextInt(SCREEN_W - 50) + 25, 0), 25);
+			meteors.add(meteor);
+			meteorSpawnTime -= meteorRate;
 		}
-		for (int i = vectorObjects.size() - 1; i >= 0; i--) {
-			VectorObject vectorObject = vectorObjects.get(i);
-			if (vectorObject.isDeleted()) {
-				vectorObjects.remove(i);
+		for (int i = meteors.size() - 1; i >= 0; i--) {
+			Meteor meteor = meteors.get(i);
+			if (meteor.isDeleted()) {
+				meteors.remove(i);
+				continue;
 			}
-			vectorObject.updateObject(delta);
+			meteor.setWind(wind);
+			meteor.updateObject(delta);
+			meteor.updateWorld();
+		}
+		for (int i = cityBlocks.size() - 1; i >= 0; i--) {
+			CityBlock cityBlock = cityBlocks.get(i);
+			if (cityBlock.isDeleted()) {
+				cityBlocks.remove(i);
+				continue;
+			}
+			for (Meteor meteor : meteors) {
+				if (meteor.isDeleted()) {
+					continue;
+				}
+				if (cityBlock.isPointInBounds(meteor.getLocation())) {
+					meteor.setDeleted(true);
+					cityBlock.setDeleted(true);
+					break;
+				}
+			}
+			cityBlock.updateObject(delta);
+			cityBlock.updateWorld();
 		}
 	}
-
+	
 	private void render(Graphics g) {
-		for (VectorObject vectorObject : vectorObjects) {
+		for (VectorObject vectorObject : meteors) {
+			vectorObject.render(g);
+		}
+		for (VectorObject vectorObject : cityBlocks) {
 			vectorObject.render(g);
 		}
 		
-		g.drawString("Score: " + score, 10, 10);
+		g.drawString(String.format("Wind: %.2f", wind), 10, 10);
+		g.drawString(String.format("Score: %d", score), 10, 25);
 		drawCursor(g);
 	}
 
