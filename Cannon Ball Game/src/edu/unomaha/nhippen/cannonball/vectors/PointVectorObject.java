@@ -1,7 +1,6 @@
 package edu.unomaha.nhippen.cannonball.vectors;
 
 import java.awt.Graphics;
-import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,7 +10,7 @@ public class PointVectorObject extends VectorObject {
 	
 	public PointVectorObject(List<Vector2f> points) {
 		this.points = points;
-		setLocation(new Point(0, 0));
+		setLocation(new Vector2f(0, 0));
 		setRotation(0);
 		setScale(1);
 		setWorld(Matrix3x3f.identity());
@@ -24,7 +23,9 @@ public class PointVectorObject extends VectorObject {
 	public List<Vector2f> getAdjustedPoints() {
 		List<Vector2f> adjustedPoints = new ArrayList<>();
 		for (Vector2f point : this.points) {
-			adjustedPoints.add(getWorld().mul(point));
+			Vector2f adjustedPoint = getWorld().mul(point);
+			adjustedPoint = getViewportTranform().mul(adjustedPoint);
+			adjustedPoints.add(adjustedPoint);
 		}
 		return adjustedPoints;
 	}
@@ -39,6 +40,9 @@ public class PointVectorObject extends VectorObject {
 	
 	@Override
 	public void render(Graphics g) {
+		if (isDeleted()) {
+			return;
+		}
 		g.setColor(getColor());
 		List<Vector2f> adjustedPoints = getAdjustedPoints();
 		for (int i = 0; i < adjustedPoints.size(); i++) {

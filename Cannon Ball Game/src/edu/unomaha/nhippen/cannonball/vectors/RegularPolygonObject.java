@@ -5,14 +5,14 @@ import java.util.List;
 
 public class RegularPolygonObject extends PointVectorObject {
 	
-	private int radius;
+	private float radius;
 	
-	public RegularPolygonObject(int sides, int radius) {
+	public RegularPolygonObject(int sides, float radius) {
 		super(generatePolygonPoints(sides, radius));
-		this.radius = 20;
+		this.radius = 0.5f;
 	}
 
-	public int getRadius() {
+	public float getRadius() {
 		return radius;
 	}
 
@@ -21,7 +21,7 @@ public class RegularPolygonObject extends PointVectorObject {
 	 * @param sides the number of sides
 	 * @return the vectors of the polygon
 	 */
-	private static List<Vector2f> generatePolygonPoints(int sides, int radius) {
+	private static List<Vector2f> generatePolygonPoints(int sides, float radius) {
 		List<Vector2f> points = new ArrayList<>(sides);
 		for (int  i = 0; i < sides; i++) {
 			float x = (float) (radius * Math.cos((Math.PI / sides) + (i * 2F * Math.PI / sides)));

@@ -1,18 +1,16 @@
 package edu.unomaha.nhippen.cannonball.vectors;
 
 import java.awt.Color;
-import java.awt.Point;
-
-import edu.unomaha.nhippen.cannonball.Drawable;
 
 public abstract class VectorObject implements Drawable {
 
 	private Matrix3x3f world;
 	private boolean deleted;
 	private Color color;
-	private Point location;
+	private Vector2f location;
 	private float scale;
 	private float rotation;
+	private Matrix3x3f viewportTranform;
 	
 	public Matrix3x3f getWorld() {
 		return world;
@@ -38,14 +36,14 @@ public abstract class VectorObject implements Drawable {
 		this.color = color;
 	}
 
-	public Point getLocation() {
+	public Vector2f getLocation() {
 		return location;
 	}
 
-	public void setLocation(Point location) {
+	public void setLocation(Vector2f location) {
 		this.location = location;
 	}
-
+	
 	public float getScale() {
 		return scale;
 	}
@@ -62,8 +60,17 @@ public abstract class VectorObject implements Drawable {
 		this.rotation = rotation;
 	}
 	
+	public Matrix3x3f getViewportTranform() {
+		return viewportTranform;
+	}
+
+	public void setViewportTranform(Matrix3x3f viewportTranform) {
+		this.viewportTranform = viewportTranform;
+	}
+
 	@Override
 	public void updateWorld() {
+		this.world = Matrix3x3f.identity();
 		this.world = Matrix3x3f.scale(this.scale, this.scale);
 		this.world = this.world.mul(Matrix3x3f.rotate(this.rotation));
 		this.world = this.world.mul(Matrix3x3f.translate(location.x, location.y));

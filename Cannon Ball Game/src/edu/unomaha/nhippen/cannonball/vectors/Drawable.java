@@ -1,4 +1,4 @@
-package edu.unomaha.nhippen.cannonball;
+package edu.unomaha.nhippen.cannonball.vectors;
 
 import java.awt.Graphics;
 
