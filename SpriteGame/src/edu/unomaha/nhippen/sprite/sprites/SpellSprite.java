@@ -1,7 +1,7 @@
 package edu.unomaha.nhippen.sprite.sprites;
 
 import java.awt.image.BufferedImage;
-import java.io.File;
+import java.net.URL;
 
 import javax.imageio.ImageIO;
 
@@ -13,7 +13,8 @@ public class SpellSprite extends BoundingSprite {
 	
 	static {
 		try {
-			BASE_IMAGE = ImageIO.read(new File("resources/sprites/Spell.png"));
+			URL url = SpellSprite.class.getResource("/sprites/Spell.png");
+			BASE_IMAGE = ImageIO.read(url);
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(1);

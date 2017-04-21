@@ -1,7 +1,7 @@
 package edu.unomaha.nhippen.sprite.sprites;
 
 import java.awt.image.BufferedImage;
-import java.io.File;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,7 +22,8 @@ public class ActorSprite extends BoundingSprite {
 	
 	static {
 		try {
-			BufferedImage spriteSheet = ImageIO.read(new File("resources/sprites/MageActor.png"));
+			URL url = ActorSprite.class.getResource("/sprites/MageActor.png");
+			BufferedImage spriteSheet = ImageIO.read(url);
 			BASE_IMAGES.put(Direction.NORTH, spriteSheet.getSubimage(48, 144, 48, 48));
 			List<BufferedImage> northWalking = new ArrayList<>();
 			northWalking.add(spriteSheet.getSubimage(0, 144, 48, 48));
